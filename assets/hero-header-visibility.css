@@ -1,0 +1,85 @@
+/**
+ * Hero-aware header visibility -- pairs with `assets/hero-header-visibility.js`.
+ *
+ * State is driven by a single attribute on `#header-component`:
+ *   (no attribute)   -> header is over the hero: transparent, black text, pinned
+ *   [data-past-hero] -> hero is out of view: header hidden entirely
+ */
+
+/**
+ * 1. Keep the transparent treatment while the header is pinned over the hero.
+ *
+ * Horizon's own rule in `sections/header.liquid` reverts a transparent header to a solid
+ * background as soon as it sticks:
+ *
+ *   &[transparent='not-sticky'][data-sticky-state='active'] { --closed-underlay-height: 100%; ... }
+ *
+ * We re-apply the transparent values for as long as we are still over the hero. The
+ * `:not(:has(...))` guards intentionally mirror Horizon's own menu-hover / open-submenu
+ * exceptions, so hovering the nav still brings the solid background back for legibility.
+ */
+.header[transparent][data-sticky-state='active']:not([data-past-hero]):not(
+    :has(.menu-list__list-item > .menu-list__link:not([aria-haspopup]):hover)
+  ):not(:has(header-menu[aria-expanded='true'])) {
+  --closed-underlay-height: 0px;
+  --color-foreground: var(--color-transparent-text);
+  --color-foreground-rgb: var(--color-transparent-text-rgb);
+  --color-border: var(--color-transparent-text);
+  --color-border-rgb: var(--color-transparent-text-rgb);
+  --header-logo-display: none;
+  --header-logo-inverse-display: block;
+}
+
+/**
+ * Horizon scopes the transparent text colour to `.header__row` and drops it once
+ * `data-sticky-state` is active. Re-apply it for the pinned-over-hero state.
+ */
+.header[transparent][data-sticky-state='active']:not([data-past-hero]):not(
+    :has(.menu-list__link:hover)
+  ):not(:has(header-menu[aria-expanded='true']))
+  .header__row {
+  --color-foreground: var(--color-transparent-text);
+  --color-foreground-rgb: var(--color-transparent-text-rgb);
+  --color-border: var(--color-transparent-text);
+  --color-border-rgb: var(--color-transparent-text-rgb);
+  --color-primary-button-background: var(--color-transparent-text);
+  --color-primary-button-text: var(--color-transparent-text-contrast);
+}
+
+/* Same treatment for the cart bubble, which Horizon also swaps back on sticky. */
+.header[transparent][data-bubble-style='default'][data-sticky-state='active']:not(
+    [data-past-hero]
+  ):not(:has(.menu-list__link:hover)):not(:has(header-menu[aria-expanded='true']))
+  .header__row {
+  --cart-bubble-background: var(--color-transparent-text, var(--cart-bubble-background-fallback));
+  --cart-bubble-text: var(--color-transparent-text-contrast, var(--cart-bubble-text-fallback));
+}
+
+/**
+ * 2. Hide the header entirely once the hero is out of view.
+ *
+ * `visibility` as well as `opacity`, so it stops taking clicks and leaves the accessibility
+ * tree rather than remaining an invisible click target. The delayed visibility transition
+ * lets the opacity fade finish before it flips; coming back, the base rule's transition
+ * restores visibility immediately.
+ */
+.header[data-past-hero],
+.header[data-sticky-state][data-past-hero] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--animation-speed, 200ms) var(--animation-easing, ease),
+    visibility 0s linear var(--animation-speed, 200ms);
+}
+
+/**
+ * Never hide the header inside the theme editor -- a merchant scrolling the preview would
+ * otherwise lose access to the header and be unable to select or configure it.
+ */
+.shopify-design-mode .header[data-past-hero],
+.shopify-design-mode .header[data-sticky-state][data-past-hero] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}

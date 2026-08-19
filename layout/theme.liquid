@@ -43,6 +43,16 @@
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-palette' -%}
 
+    {% comment %}
+      Custom: keeps the transparent header black-on-video while it is pinned over the hero,
+      then hides it once the hero scrolls out of view. See assets/hero-header-visibility.css
+      for the reasoning -- Horizon otherwise reverts a transparent header to solid the moment
+      it sticks. The module must come after 'scripts' above, which renders the importmap it
+      relies on for @theme/scroll-container.
+    {% endcomment %}
+    {{ 'hero-header-visibility.css' | asset_url | stylesheet_tag }}
+    <script type="module" src="{{ 'hero-header-visibility.js' | asset_url }}"></script>
+
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}
     {% endif %}
