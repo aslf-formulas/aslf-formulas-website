@@ -17,8 +17,8 @@
         "announcement_BxgCk9": {
           "type": "_announcement",
           "settings": {
-            "text": "Welcome to our store",
-            "link": "",
+            "text": "Click here for 10% off your first order",
+            "link": "shopify://pages/subscribe",
             "font": "var(--font-subheading--family)",
             "font_size": "0.75rem",
             "weight": "",
@@ -95,7 +95,8 @@
         "divider_width": 0,
         "divider_size": "page-width",
         "border_width": 0,
-        "enable_transparent_header_home": false,
+        "enable_transparent_header_home": true,
+        "text_color_transparent_home": "#000000",
         "enable_transparent_header_product": false,
         "enable_transparent_header_collection": false
       }
