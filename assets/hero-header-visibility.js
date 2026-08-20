@@ -8,19 +8,15 @@
  * `active` -- i.e. within the first pixel of scroll.
  *
  * We want the opposite: the header stays transparent (black text) while pinned over the hero
- * video, then disappears entirely once the hero has scrolled out of view, and returns at the top.
+ * video, then disappears entirely once the hero has scrolled past -- which, with the hero at
+ * full-screen height, is the moment the product grid reaches the top of the viewport.
  *
  * This module does as little as possible -- it sets a single attribute, `data-past-hero`, on
  * `#header-component`. All visual work lives in `assets/hero-header-visibility.css`. If this
  * script fails to load, the header simply falls back to stock Horizon behaviour.
- *
- * Note: above 990px Horizon scrolls `.page-wrapper`, not the viewport, so the
- * IntersectionObserver root must come from `@theme/scroll-container` and be rebuilt when the
- * breakpoint changes. A window-rooted observer would silently never fire on desktop.
- * See the equivalent pattern in `assets/header.js` (`#handleBreakpointChange`).
  */
 
-import { getIntersectionRoot, scrollContainerMediaQuery } from '@theme/scroll-container';
+import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
 
 const PAST_HERO_ATTRIBUTE = 'data-past-hero';
 
@@ -33,34 +29,43 @@ function init() {
 
   const hero = heroMedia.closest('.shopify-section') ?? heroMedia;
 
-  /** @type {IntersectionObserver | null} */
-  let observer = null;
+  /** @type {number | null} */
+  let rafId = null;
+  /** @type {EventTarget | null} */
+  let scrollTarget = null;
 
-  /** @param {IntersectionObserverEntry[]} entries */
-  const handleIntersection = (entries) => {
-    for (const entry of entries) {
-      // Only treat "not intersecting" as past-hero when the hero sits above the viewport.
-      // Without the bounds check, an observer firing before the hero is reached would
-      // hide the header while it is still supposed to be overlaid on the video.
-      const isPastHero = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0;
-      header.toggleAttribute(PAST_HERO_ATTRIBUTE, isPastHero);
-    }
+  const update = () => {
+    rafId = null;
+
+    // getBoundingClientRect() is viewport-relative and stays correct no matter which
+    // element is actually scrolling. That matters here: above 990px Horizon scrolls
+    // .page-wrapper rather than the document, so anything derived from document scroll
+    // offsets -- or from an IntersectionObserver whose root resolved to the wrong
+    // element -- would silently never fire on desktop.
+    const isPastHero = hero.getBoundingClientRect().bottom <= 0;
+    header.toggleAttribute(PAST_HERO_ATTRIBUTE, isPastHero);
   };
 
-  const observe = () => {
-    observer?.disconnect();
-    observer = new IntersectionObserver(handleIntersection, {
-      root: getIntersectionRoot(),
-      threshold: 0,
-    });
-    observer.observe(hero);
+  const requestUpdate = () => {
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(update);
   };
 
-  observe();
+  // The scroll target swaps between .page-wrapper and the document at 990px, so the
+  // listener has to be rebound when the breakpoint changes. Same pattern as
+  // assets/header.js (#handleBreakpointChange).
+  const bindScrollTarget = () => {
+    scrollTarget?.removeEventListener('scroll', requestUpdate);
+    scrollTarget = getScrollEventTarget();
+    scrollTarget.addEventListener('scroll', requestUpdate, { passive: true });
+    requestUpdate();
+  };
 
-  // The scroll container swaps between `.page-wrapper` and the viewport at 990px, which
-  // invalidates the observer's root.
-  scrollContainerMediaQuery.addEventListener('change', observe);
+  bindScrollTarget();
+  scrollContainerMediaQuery.addEventListener('change', bindScrollTarget);
+
+  // Hero height is viewport-relative (full-screen), so a resize moves the trigger point.
+  window.addEventListener('resize', requestUpdate, { passive: true });
 }
 
 if (document.readyState === 'loading') {

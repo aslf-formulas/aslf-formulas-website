@@ -3,7 +3,7 @@
  *
  * State is driven by a single attribute on `#header-component`:
  *   (no attribute)   -> header is over the hero: transparent, black text, pinned
- *   [data-past-hero] -> hero is out of view: header hidden entirely
+ *   [data-past-hero] -> hero has scrolled past: header hidden entirely
  */
 
 /**
@@ -56,12 +56,18 @@
 }
 
 /**
- * 2. Hide the header entirely once the hero is out of view.
+ * 2. Hide the header entirely once the hero has scrolled past.
  *
  * `visibility` as well as `opacity`, so it stops taking clicks and leaves the accessibility
  * tree rather than remaining an invisible click target. The delayed visibility transition
  * lets the opacity fade finish before it flips; coming back, the base rule's transition
  * restores visibility immediately.
+ *
+ * Note: this intentionally applies inside the theme editor too. An earlier version exempted
+ * `.shopify-design-mode` so the header could never be scrolled out of a merchant's reach,
+ * but the editor preview is exactly where an unpublished theme gets reviewed -- so the
+ * exemption cancelled this behaviour in the one place it was being looked at. Horizon's
+ * editor sidebar lists sections directly, so the header stays selectable regardless.
  */
 .header[data-past-hero],
 .header[data-sticky-state][data-past-hero] {
@@ -71,15 +77,4 @@
   transition:
     opacity var(--animation-speed, 200ms) var(--animation-easing, ease),
     visibility 0s linear var(--animation-speed, 200ms);
-}
-
-/**
- * Never hide the header inside the theme editor -- a merchant scrolling the preview would
- * otherwise lose access to the header and be unable to select or configure it.
- */
-.shopify-design-mode .header[data-past-hero],
-.shopify-design-mode .header[data-sticky-state][data-past-hero] {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
 }
