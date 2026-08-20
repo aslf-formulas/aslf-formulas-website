@@ -293,7 +293,7 @@
             "show_sample_reviews": true,
             "reviews_selection": "all",
             "products": [],
-            "filter_pinned": false,
+            "filter_pinned": true,
             "filter_featured": false,
             "filter_custom_tags": "",
             "star_rating": "all",
@@ -319,7 +319,7 @@
             "transition_speed": 5,
             "header_text": "Customers are saying",
             "show_average_rating": true,
-            "rating_display": "default"
+            "rating_display": "show_trust_badge"
           }
         }
       },
