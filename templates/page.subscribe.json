@@ -77,13 +77,63 @@
     "signup": {
       "type": "section",
       "blocks": {
+        "code_callout": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<h3>Use code <strong>WELCOME10</strong> at checkout for 10% off your first order</h3>",
+            "width": "100%",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "h3",
+            "font": "var(--font-body--family)",
+            "font_size": "",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "code_terms": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>10% off your entire order. No minimum purchase. One use per customer. Works on both one-time purchases and subscriptions.</p>",
+            "width": "100%",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "paragraph",
+            "font": "var(--font-body--family)",
+            "font_size": "",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
         "email_signup_offer": {
           "type": "email-signup",
           "name": "t:names.email_signup",
           "settings": {
             "width": "custom",
             "custom_width": 50,
-            "heading": "Get 10% off your first order",
+            "heading": "Want early access to new formulas?",
             "heading_preset": "h4",
             "border_style": "all",
             "input_style": "default"
@@ -94,7 +144,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<p>Enter your email and we'll send your 10% discount code straight to your inbox. Unsubscribe any time.</p>",
+            "text": "<p>Join the list for new product launches, restocks and subscriber-only offers. Unsubscribe any time.</p>",
             "width": "100%",
             "max_width": "narrow",
             "alignment": "center",
@@ -117,6 +167,8 @@
         }
       },
       "block_order": [
+        "code_callout",
+        "code_terms",
         "email_signup_offer",
         "signup_fine_print"
       ],
