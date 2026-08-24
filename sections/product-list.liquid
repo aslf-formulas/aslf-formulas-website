@@ -88,11 +88,13 @@
 {% stylesheet %}
   .product-list {
     --product-list-mobile-row-gap: var(--padding-2xl);
+    --product-list-mobile-column-gap: var(--gap-md);
   }
 
   @media screen and (max-width: 749px) {
     .product-list .resource-list--grid {
       row-gap: max(var(--resource-list-row-gap), var(--product-list-mobile-row-gap));
+      column-gap: max(var(--resource-list-column-gap), var(--product-list-mobile-column-gap));
     }
   }
 {% endstylesheet %}
