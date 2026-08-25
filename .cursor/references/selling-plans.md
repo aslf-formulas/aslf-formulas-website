@@ -7,10 +7,13 @@ Horizon does **not** ship a native selling-plan picker. Recurring purchase optio
 `blocks/_selling-plan-picker.liquid` is a static nested block of `buy-buttons`. It:
 
 - Renders **only** when the product has **recurring** selling plans (`selling_plan.recurring_deliveries`)
-- Shows **Subscribe & Save** vs **One-time**
+- Shows **Subscribe & Save** first, then **One-time**
+- Defaults to Subscribe & Save (merchant can uncheck that in the block)
 - Writes `input[name="selling_plan"]` inside the product form (required for cart / Shop Pay)
 - Skips non-recurring plans such as Preorder
 - Does **not** create Shopify selling plans, products, or bundles
+
+On product templates, `snippets/price.liquid` uses the first recurring selling-plan allocation for the main price so Subscribe & Save is visible before JS runs. Collection cards keep the one-time price.
 
 Subi (or any selling-plan app) must already attach plans to the product. The picker only surfaces them.
 
@@ -22,12 +25,12 @@ Live catalog via `/products.json` has three products, all with Subi monthly 10% 
 - `foundation-capsules` ($38)
 - `age-defense-moisturizer` ($38)
 
-No bundle / $96 kit product exists. Do not invent one in Liquid. If a bundle product is added later, a merchandising text/button block on the PDP can link to it.
+**Daily Protocol / $96 bundle:** The merchant will create that product in Shopify (Hair Serum + Age Defense + Foundation). Do **not** invent it in Liquid. When a `daily-protocol` (or similar) product exists later, a merchandising text/button block can link to it from PDPs. Until then, only the Subscribe & Save picker on the three existing PDPs.
 
-Subi’s app embed is enabled in `config/settings_data.json` but injects at the theme-app-extension root, not in the Horizon buy box, so PDPs still looked like one-time add-to-cart. Shop Pay can still mention subscriptions because `payment_button` reads selling plans on the product.
+Subi’s app embed is enabled in `config/settings_data.json` but injects at the theme-app-extension root (`render-subify-widget-{productId}`), not in the Horizon buy box, so live PDPs still looked like one-time add-to-cart. Shop Pay can still mention subscriptions because `payment_button` reads selling plans on the product. Collection “Choose” already sends selling-plan products to the PDP (`quick-add.js`).
 
 ## Do not
 
 - Invent a fake Subscribe & Save UI when `selling_plan_groups` is empty
-- Create products, selling plans, or bundles via theme code
+- Create products, selling plans, or bundles via theme code (including Daily Protocol)
 - Change Canine or other brands from this repo

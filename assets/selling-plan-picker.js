@@ -118,6 +118,7 @@ class SellingPlanPicker extends Component {
   #sync(announce = false) {
     const sellingPlanId = this.#resolveSelectedPlanId();
     this.#setSellingPlanValue(sellingPlanId, announce);
+    this.#syncPaymentTermsForm(sellingPlanId);
     this.#toggleFrequency(Boolean(sellingPlanId));
     this.#updateSelectedClass();
     this.#updateOptionPrices();
@@ -160,6 +161,34 @@ class SellingPlanPicker extends Component {
     if (!changed && !announce) return;
 
     input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  /**
+   * Shop Pay installment terms live in a sibling product form. Keep its
+   * selling_plan in sync so those terms match Subscribe vs One-time.
+   *
+   * @param {string} sellingPlanId
+   */
+  #syncPaymentTermsForm(sellingPlanId) {
+    const section = this.closest('.shopify-section');
+    if (!section) return;
+
+    const forms = section.querySelectorAll('form.payment-terms');
+    for (const form of forms) {
+      let planInput = form.querySelector('input[name="selling_plan"]');
+      if (!planInput) {
+        planInput = document.createElement('input');
+        planInput.type = 'hidden';
+        planInput.name = 'selling_plan';
+        planInput.autocomplete = 'off';
+        form.append(planInput);
+      }
+
+      if (planInput.value === sellingPlanId) continue;
+
+      planInput.value = sellingPlanId;
+      planInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
   }
 
   /**

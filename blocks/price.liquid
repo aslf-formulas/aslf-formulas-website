@@ -82,6 +82,19 @@
           name="id"
           value="{{ selected_variant.id }}"
         >
+        {%- if template.name == 'product' -%}
+          {%- for allocation in selected_variant.selling_plan_allocations -%}
+            {%- if allocation.selling_plan.recurring_deliveries -%}
+              <input
+                type="hidden"
+                name="selling_plan"
+                value="{{ allocation.selling_plan.id }}"
+                autocomplete="off"
+              >
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
         {{ form | payment_terms }}
       {%- endform -%}
     </div>

@@ -148,41 +148,6 @@
         {{ 'products.product.purchase_options' | t }}
       </legend>
 
-      {% if allow_one_time %}
-        <label
-          class="selling-plan-picker__option{% if selected_selling_plan_id == blank %} selling-plan-picker__option--selected{% endif %}"
-          for="{{ one_time_id }}"
-        >
-          <input
-            id="{{ one_time_id }}"
-            class="selling-plan-picker__radio"
-            type="radio"
-            name="purchase_option-{{ block.id }}"
-            value=""
-            ref="purchaseOption[]"
-            data-purchase-type="one-time"
-            {% if selected_selling_plan_id == blank %}
-              checked
-            {% endif %}
-          >
-          <span class="selling-plan-picker__option-body">
-            <span class="selling-plan-picker__option-title">
-              {{ 'products.product.one_time_purchase' | t }}
-            </span>
-            <span
-              class="selling-plan-picker__option-price"
-              ref="oneTimePrice"
-            >
-              {%- if use_currency -%}
-                {{- variant.price | money_with_currency -}}
-              {%- else -%}
-                {{- variant.price | money -}}
-              {%- endif -%}
-            </span>
-          </span>
-        </label>
-      {% endif %}
-
       <label
         class="selling-plan-picker__option selling-plan-picker__option--subscribe{% if selected_selling_plan_id != blank %} selling-plan-picker__option--selected{% endif %}"
         for="{{ subscribe_id }}"
@@ -229,6 +194,41 @@
           </span>
         </span>
       </label>
+
+      {% if allow_one_time %}
+        <label
+          class="selling-plan-picker__option{% if selected_selling_plan_id == blank %} selling-plan-picker__option--selected{% endif %}"
+          for="{{ one_time_id }}"
+        >
+          <input
+            id="{{ one_time_id }}"
+            class="selling-plan-picker__radio"
+            type="radio"
+            name="purchase_option-{{ block.id }}"
+            value=""
+            ref="purchaseOption[]"
+            data-purchase-type="one-time"
+            {% if selected_selling_plan_id == blank %}
+              checked
+            {% endif %}
+          >
+          <span class="selling-plan-picker__option-body">
+            <span class="selling-plan-picker__option-title">
+              {{ 'products.product.one_time_purchase' | t }}
+            </span>
+            <span
+              class="selling-plan-picker__option-price"
+              ref="oneTimePrice"
+            >
+              {%- if use_currency -%}
+                {{- variant.price | money_with_currency -}}
+              {%- else -%}
+                {{- variant.price | money -}}
+              {%- endif -%}
+            </span>
+          </span>
+        </label>
+      {% endif %}
     </fieldset>
 
     {% if recurring_plan_count > 0 %}

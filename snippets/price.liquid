@@ -16,6 +16,23 @@
   assign price = selected_variant.price
   assign compare_at_price = selected_variant.compare_at_price
 
+  # Product pages default the buy box to Subscribe & Save. Show that allocation
+  # price on first paint so the main price matches the picker before JS runs.
+  # Collection cards keep the one-time variant price.
+  if template.name == 'product' and selected_variant != blank
+    for allocation in selected_variant.selling_plan_allocations
+      if allocation.selling_plan.recurring_deliveries
+        assign price = allocation.price
+        if allocation.compare_at_price > allocation.price
+          assign compare_at_price = allocation.compare_at_price
+        elsif selected_variant.price > allocation.price
+          assign compare_at_price = selected_variant.price
+        endif
+        break
+      endif
+    endfor
+  endif
+
   assign show_compare_price = false
   if compare_at_price > price
     assign show_compare_price = true
