@@ -614,11 +614,23 @@ class ProductFormComponent extends Component {
       })
     );
 
+    const sellingPlanInput = /** @type {HTMLInputElement | null} */ (this.querySelector('input[name="selling_plan"]'));
+    const sellingPlanId = sellingPlanInput?.value?.trim();
+
     const payload = {
-      items: items.map((item) => ({
-        id: Number(item.variantId),
-        quantity: item.quantity,
-      })),
+      items: items.map((item) => {
+        /** @type {{id: number, quantity: number, selling_plan?: number}} */
+        const line = {
+          id: Number(item.variantId),
+          quantity: item.quantity,
+        };
+
+        if (sellingPlanId) {
+          line.selling_plan = Number(sellingPlanId);
+        }
+
+        return line;
+      }),
       sections: cartItemComponentsSectionIds.join(','),
     };
 

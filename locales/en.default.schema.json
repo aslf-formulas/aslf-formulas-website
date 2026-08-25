@@ -74,6 +74,7 @@
     "gift_card_products": "Gift card products",
     "local_pickup": "Local pickup",
     "local_pickup_description": "Show nearby pickup locations when online store local pickup is set up. [Learn more](https://help.shopify.com/en/manual/fulfillment/setup/delivery-methods/pickup-in-store)",
+    "selling_plan_picker_description": "Shows Subscribe & Save vs One-time only when this product has Shopify selling plans. Does not create a subscription.",
     "fonts": "Fonts",
     "grid": "Grid",
     "grid_layout": "Grid layout",
@@ -249,7 +250,8 @@
     "video_autoplay": "Videos will be muted by default",
     "video_external": "Use a YouTube or Vimeo URL",
     "pills_usage": "Used for applied filters, discount codes, and search suggestions",
-    "media_type_info": "Features are populated from your menu links"
+    "media_type_info": "Features are populated from your menu links",
+    "selling_plan_picker": "Shown only when the product has Shopify selling plans. Does not create a subscription."
   },
   "names": {
     "column": "Column",
@@ -387,6 +389,7 @@
     "product_custom_property": "Special instructions",
     "pull_quote": "Pull quote",
     "quantity": "Quantity",
+    "selling_plan_picker": "Selling plans",
     "quick_order_list": "Quick order list",
     "row": "Row",
     "search": "Search",
@@ -1081,6 +1084,7 @@
     "show_inventory_quantity": "Show low stock quantity",
     "show_pickup_availability": "Show pickup availability",
     "show_powered_by_shopify": "Show \"Powered by Shopify\"",
+    "select_subscription_by_default": "Select Subscribe & Save by default",
     "show_sale_price_first": "Show sale price first",
     "show_search": "Show search",
     "show_second_image_on_hover": "Show second image on hover",

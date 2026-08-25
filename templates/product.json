@@ -247,6 +247,18 @@
                 "padding-inline-end": 0
               },
               "blocks": {
+                "selling-plan-picker": {
+                  "type": "_selling-plan-picker",
+                  "static": true,
+                  "settings": {
+                    "select_subscription_by_default": true,
+                    "padding-block-start": 0,
+                    "padding-block-end": 8,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
                 "quantity": {
                   "type": "quantity",
                   "static": true,

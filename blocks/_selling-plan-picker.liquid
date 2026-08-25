@@ -1,0 +1,507 @@
+{%- doc -%}
+  Native Shopify selling-plan picker for product forms.
+
+  Renders only when the current product has recurring selling plans (for example
+  Subi Subscribe & Save). Does not create selling plans. Preorder / prepaid
+  (non-recurring) plans are omitted so the UI stays Subscribe & Save vs One-time.
+
+  Intended as a static nested block of buy-buttons so the selling_plan input is
+  submitted with the product form.
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign variant = product.selected_or_first_available_variant
+  assign use_currency = settings.currency_code_enabled_product_pages
+  assign recurring_plan_count = 0
+  assign first_recurring_plan_id = blank
+  assign first_recurring_plan_name = blank
+  assign first_recurring_save_percent = blank
+  assign first_recurring_option_name = blank
+  assign first_recurring_option_value = blank
+
+  if product != blank
+    for selling_plan_group in product.selling_plan_groups
+      for selling_plan in selling_plan_group.selling_plans
+        if selling_plan.recurring_deliveries
+          assign recurring_plan_count = recurring_plan_count | plus: 1
+          if first_recurring_plan_id == blank
+            assign first_recurring_plan_id = selling_plan.id
+            assign first_recurring_plan_name = selling_plan.name
+            assign first_recurring_option_name = selling_plan_group.options.first.name
+            assign first_recurring_option_value = selling_plan.options.first.value
+            assign adjustment = selling_plan.price_adjustments.first
+            if adjustment and adjustment.value_type == 'percentage' and adjustment.value > 0
+              assign first_recurring_save_percent = adjustment.value
+            endif
+          endif
+        endif
+      endfor
+    endfor
+  endif
+
+  assign show_picker = false
+  if recurring_plan_count > 0
+    assign show_picker = true
+  elsif request.visual_preview_mode
+    assign show_picker = true
+  endif
+
+  assign allow_one_time = true
+  if product.requires_selling_plan
+    assign allow_one_time = false
+  endif
+
+  assign select_subscription_by_default = block.settings.select_subscription_by_default
+  if allow_one_time == false
+    assign select_subscription_by_default = true
+  endif
+
+  assign selected_selling_plan_id = blank
+  if show_picker and recurring_plan_count > 0 and select_subscription_by_default
+    assign selected_selling_plan_id = first_recurring_plan_id
+  endif
+
+  assign subscribe_allocation = nil
+  if variant != blank and first_recurring_plan_id != blank
+    for allocation in variant.selling_plan_allocations
+      if allocation.selling_plan.recurring_deliveries and allocation.selling_plan.id == first_recurring_plan_id
+        assign subscribe_allocation = allocation
+        break
+      endif
+    endfor
+  endif
+
+  assign picker_id = 'SellingPlan-' | append: section.id | append: '-' | append: block.id
+  assign one_time_id = picker_id | append: '-one-time'
+  assign subscribe_id = picker_id | append: '-subscribe'
+  assign frequency_id = picker_id | append: '-frequency'
+  assign legend_id = picker_id | append: '-legend'
+%}
+
+{% if show_picker %}
+  <script
+    src="{{ 'selling-plan-picker.js' | asset_url }}"
+    type="module"
+  ></script>
+
+  <selling-plan-picker
+    class="selling-plan-picker spacing-style"
+    data-testid="selling-plan-picker"
+    data-section-id="{{ section.id }}"
+    data-variant-id="{{ variant.id }}"
+    data-price-sale-label="{{ 'content.price_sale' | t | escape }}"
+    data-price-regular-label="{{ 'content.price_regular' | t | escape }}"
+    style="{% render 'spacing-style', settings: block.settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <script
+      type="application/json"
+      ref="planData"
+    >
+      {
+        "defaultVariantId": {{ variant.id | json }},
+        "variants": {
+          {%- for product_variant in product.variants -%}
+            "{{ product_variant.id }}": {
+              "oneTimePrice": {%- if use_currency -%}{{ product_variant.price | money_with_currency | json }}{%- else -%}{{ product_variant.price | money | json }}{%- endif -%},
+              "plans": {
+                {%- assign plan_comma = false -%}
+                {%- for allocation in product_variant.selling_plan_allocations -%}
+                  {%- if allocation.selling_plan.recurring_deliveries -%}
+                    {%- if plan_comma -%},{%- endif -%}
+                    "{{ allocation.selling_plan.id }}": {
+                      "price": {%- if use_currency -%}{{ allocation.price | money_with_currency | json }}{%- else -%}{{ allocation.price | money | json }}{%- endif -%},
+                      "compareAt": {%- if allocation.compare_at_price > allocation.price -%}
+                        {%- if use_currency -%}{{ allocation.compare_at_price | money_with_currency | json }}{%- else -%}{{ allocation.compare_at_price | money | json }}{%- endif -%}
+                      {%- else -%}
+                        null
+                      {%- endif -%}
+                    }
+                    {%- assign plan_comma = true -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              }
+            }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        }
+      }
+    </script>
+
+    <input
+      type="hidden"
+      name="selling_plan"
+      ref="sellingPlanInput"
+      value="{{ selected_selling_plan_id }}"
+      autocomplete="off"
+    >
+
+    <fieldset class="selling-plan-picker__fieldset">
+      <legend
+        id="{{ legend_id }}"
+        class="selling-plan-picker__legend"
+      >
+        {{ 'products.product.purchase_options' | t }}
+      </legend>
+
+      {% if allow_one_time %}
+        <label
+          class="selling-plan-picker__option{% if selected_selling_plan_id == blank %} selling-plan-picker__option--selected{% endif %}"
+          for="{{ one_time_id }}"
+        >
+          <input
+            id="{{ one_time_id }}"
+            class="selling-plan-picker__radio"
+            type="radio"
+            name="purchase_option-{{ block.id }}"
+            value=""
+            ref="purchaseOption[]"
+            data-purchase-type="one-time"
+            {% if selected_selling_plan_id == blank %}
+              checked
+            {% endif %}
+          >
+          <span class="selling-plan-picker__option-body">
+            <span class="selling-plan-picker__option-title">
+              {{ 'products.product.one_time_purchase' | t }}
+            </span>
+            <span
+              class="selling-plan-picker__option-price"
+              ref="oneTimePrice"
+            >
+              {%- if use_currency -%}
+                {{- variant.price | money_with_currency -}}
+              {%- else -%}
+                {{- variant.price | money -}}
+              {%- endif -%}
+            </span>
+          </span>
+        </label>
+      {% endif %}
+
+      <label
+        class="selling-plan-picker__option selling-plan-picker__option--subscribe{% if selected_selling_plan_id != blank %} selling-plan-picker__option--selected{% endif %}"
+        for="{{ subscribe_id }}"
+      >
+        <input
+          id="{{ subscribe_id }}"
+          class="selling-plan-picker__radio"
+          type="radio"
+          name="purchase_option-{{ block.id }}"
+          value="{{ first_recurring_plan_id }}"
+          ref="purchaseOption[]"
+          data-purchase-type="subscribe"
+          {% if selected_selling_plan_id != blank %}
+            checked
+          {% endif %}
+          {% if recurring_plan_count == 0 %}
+            disabled
+          {% endif %}
+        >
+        <span class="selling-plan-picker__option-body">
+          <span class="selling-plan-picker__option-heading">
+            <span class="selling-plan-picker__option-title">
+              {{ 'products.product.subscribe_and_save' | t }}
+            </span>
+            {% if first_recurring_save_percent != blank %}
+              <span class="selling-plan-picker__badge">
+                {{ 'products.product.subscribe_save_percent' | t: percent: first_recurring_save_percent }}
+              </span>
+            {% endif %}
+          </span>
+          <span
+            class="selling-plan-picker__option-price"
+            ref="subscribePrice"
+          >
+            {%- if subscribe_allocation -%}
+              {%- if use_currency -%}
+                {{- subscribe_allocation.price | money_with_currency -}}
+              {%- else -%}
+                {{- subscribe_allocation.price | money -}}
+              {%- endif -%}
+            {%- elsif request.visual_preview_mode -%}
+              {{- variant.price | money -}}
+            {%- endif -%}
+          </span>
+        </span>
+      </label>
+    </fieldset>
+
+    {% if recurring_plan_count > 0 %}
+      <div
+        class="selling-plan-picker__frequency"
+        ref="frequencyWrapper"
+        {% if selected_selling_plan_id == blank %}
+          hidden
+        {% endif %}
+      >
+        {% if recurring_plan_count == 1 %}
+          <p class="selling-plan-picker__frequency-text">
+            {%- if first_recurring_option_name != blank -%}
+              {{ first_recurring_option_name | escape }}
+            {%- else -%}
+              {{ 'products.product.delivery_every' | t }}
+            {%- endif %}
+            {{ first_recurring_option_value | default: first_recurring_plan_name | escape }}
+          </p>
+        {% else %}
+          <label
+            class="selling-plan-picker__frequency-label"
+            for="{{ frequency_id }}"
+          >
+            {%- if first_recurring_option_name != blank -%}
+              {{ first_recurring_option_name | escape }}
+            {%- else -%}
+              {{ 'products.product.delivery_every' | t }}
+            {%- endif -%}
+          </label>
+          <select
+            id="{{ frequency_id }}"
+            class="selling-plan-picker__frequency-select"
+            ref="frequencySelect"
+            aria-label="{{ 'products.product.delivery_frequency' | t }}"
+          >
+            {% for selling_plan_group in product.selling_plan_groups %}
+              {% for selling_plan in selling_plan_group.selling_plans %}
+                {% if selling_plan.recurring_deliveries %}
+                  <option
+                    value="{{ selling_plan.id }}"
+                    {% if selling_plan.id == first_recurring_plan_id %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ selling_plan.options.first.value | default: selling_plan.name | escape }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+    {% endif %}
+  </selling-plan-picker>
+{% endif %}
+
+{% stylesheet %}
+  .selling-plan-picker {
+    display: block;
+    width: 100%;
+    margin-block-end: var(--gap-sm);
+  }
+
+  .selling-plan-picker__fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .selling-plan-picker__legend {
+    padding: 0;
+    margin-block-end: var(--margin-xs);
+    font-family: var(--font-subheading--family);
+    font-size: var(--font-size--sm);
+    font-weight: var(--font-subheading--weight);
+    color: var(--color-foreground);
+  }
+
+  .selling-plan-picker__option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-sm);
+    width: 100%;
+    margin: 0;
+    padding: var(--padding-md);
+    min-height: var(--minimum-touch-target);
+    border: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-50));
+    border-radius: var(--style-border-radius-inputs);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    cursor: pointer;
+  }
+
+  .selling-plan-picker__option--subscribe {
+    border-width: 2px;
+  }
+
+  .selling-plan-picker__option--selected {
+    border-color: var(--color-foreground);
+    background: rgb(var(--color-foreground-rgb) / var(--opacity-5));
+  }
+
+  .selling-plan-picker__radio {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-block-start: 0.15rem;
+    flex-shrink: 0;
+    accent-color: var(--color-foreground);
+  }
+
+  .selling-plan-picker__radio:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .selling-plan-picker__option-body {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-sm);
+    min-width: 0;
+  }
+
+  .selling-plan-picker__option-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-2xs) var(--gap-xs);
+  }
+
+  .selling-plan-picker__option-title {
+    font-size: var(--font-size--sm);
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .selling-plan-picker__option-price {
+    font-size: var(--font-size--sm);
+    font-weight: 600;
+    color: var(--color-foreground);
+    white-space: nowrap;
+  }
+
+  .selling-plan-picker__badge {
+    display: inline-block;
+    padding-block: 0.1rem;
+    padding-inline: 0.4rem;
+    border-radius: var(--style-border-radius-inputs);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    font-size: var(--font-size--xs);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .selling-plan-picker__frequency {
+    margin-block-start: var(--gap-xs);
+    padding-inline-start: calc(1.25rem + var(--gap-sm));
+  }
+
+  .selling-plan-picker__frequency-text,
+  .selling-plan-picker__frequency-label {
+    margin: 0;
+    font-size: var(--font-size--sm);
+    color: var(--color-foreground);
+  }
+
+  .selling-plan-picker__frequency-label {
+    display: block;
+    margin-block-end: var(--margin-2xs, 0.25rem);
+  }
+
+  .selling-plan-picker__frequency-select {
+    width: 100%;
+    max-width: 20rem;
+    padding-block: var(--padding-sm);
+    padding-inline: var(--padding-md);
+    border: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-50));
+    border-radius: var(--style-border-radius-inputs);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: var(--font-size--sm);
+  }
+
+  .selling-plan-picker__frequency-select:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    .selling-plan-picker__radio:focus-visible,
+    .selling-plan-picker__frequency-select:focus-visible {
+      outline: 2px solid transparent;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .selling-plan-picker__option {
+      border-width: 2px;
+      border-color: var(--color-foreground);
+    }
+
+    .selling-plan-picker__badge {
+      border: 1px solid var(--color-background);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.selling_plan_picker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.selling_plan_picker_description"
+    },
+    {
+      "type": "checkbox",
+      "id": "select_subscription_by_default",
+      "label": "t:settings.select_subscription_by_default",
+      "default": true,
+      "info": "t:info.selling_plan_picker"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}
