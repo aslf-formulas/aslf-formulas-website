@@ -46,10 +46,10 @@
       {% endif %}
       {{ block.shopify_attributes }}
     >
-      <summary class="menu__heading{% if heading == blank and menu.title == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}">
-        <span class="menu__heading__default">{{ heading | default: menu.title }}</span>
+      <summary class="menu__heading{% if heading == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}">
+        <span class="menu__heading__default">{{ heading }}</span>
         <span class="menu__heading__accordion">
-          {{ heading | default: menu.title }}
+          {{ heading }}
           {% if block_settings.accordion_icon == 'plus' %}
             <span class="menu__heading__toggle svg-wrapper icon-plus">
               {{- 'icon-plus.svg' | inline_asset_content -}}
