@@ -149,7 +149,7 @@
           "type": "menu",
           "settings": {
             "menu": "footer",
-            "heading": "Our Company",
+            "heading": "",
             "menu_spacing": 12,
             "show_as_accordion": false,
             "accordion_icon": "plus",
