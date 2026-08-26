@@ -27,10 +27,10 @@ import { StandardEvents, ProductSelectEvent, CartLinesUpdateEvent, CartErrorEven
 /**
  * @typedef {Object} StickyAddToCartRefs
  * @property {HTMLElement} stickyBar - The floating bar container
- * @property {HTMLButtonElement} addToCartButton - Sticky bar's button
- * @property {HTMLElement} quantityDisplay - Quantity display container
- * @property {HTMLElement} quantityNumber - Quantity number element
- * @property {HTMLImageElement} productImage - Product image element
+ * @property {HTMLButtonElement} [addToCartButton] - Sticky bar's button (nested in add-to-cart-component for STOQ)
+ * @property {HTMLElement} [quantityDisplay] - Quantity display container
+ * @property {HTMLElement} [quantityNumber] - Quantity number element
+ * @property {HTMLImageElement} [productImage] - Product image element
  */
 
 /**
@@ -40,7 +40,7 @@ import { StandardEvents, ProductSelectEvent, CartLinesUpdateEvent, CartErrorEven
  * @extends {Component<StickyAddToCartRefs>}
  */
 class StickyAddToCartComponent extends Component {
-  requiredRefs = ['stickyBar', 'addToCartButton', 'quantityDisplay', 'quantityNumber'];
+  requiredRefs = ['stickyBar'];
 
   /** @type {IntersectionObserver | null} */
   #buyButtonsIntersectionObserver = null;
@@ -178,16 +178,16 @@ class StickyAddToCartComponent extends Component {
     this.#targetAddToCartButton.dataset.puppet = 'true';
     this.#targetAddToCartButton.click();
     const cartIcon = document.querySelector('.header-actions__cart-icon');
+    const stickyButton = this.#getStickyButton();
 
-    if (this.refs.addToCartButton.dataset.added !== 'true') {
-      this.refs.addToCartButton.dataset.added = 'true';
+    if (stickyButton && stickyButton.dataset.added !== 'true') {
+      stickyButton.dataset.added = 'true';
     }
 
-    if (!cartIcon || !this.refs.addToCartButton || !this.refs.productImage) return;
+    if (!cartIcon || !stickyButton || !this.refs.productImage) return;
     if (this.#resetTimeout) clearTimeout(this.#resetTimeout);
 
     const flyToCartElement = /** @type {FlyToCart} */ (document.createElement('fly-to-cart'));
-    const sourceStyles = getComputedStyle(this.refs.productImage);
 
     flyToCartElement.classList.add('fly-to-cart--sticky');
     flyToCartElement.style.setProperty('background-image', `url(${this.refs.productImage.src})`);
@@ -197,9 +197,9 @@ class StickyAddToCartComponent extends Component {
 
     document.body.appendChild(flyToCartElement);
 
-    await onAnimationEnd([this.refs.addToCartButton, flyToCartElement]);
+    await onAnimationEnd([stickyButton, flyToCartElement]);
     this.#resetTimeout = setTimeout(() => {
-      this.refs.addToCartButton.removeAttribute('data-added');
+      stickyButton.removeAttribute('data-added');
     }, 800);
   };
 
@@ -382,19 +382,31 @@ class StickyAddToCartComponent extends Component {
    * Updates the button text to include quantity
    */
   #updateButtonText() {
-    const { addToCartButton, quantityDisplay, quantityNumber } = this.refs;
+    const addToCartButton = this.#getStickyButton();
+    const quantityDisplay = this.querySelector('[ref="quantityDisplay"]');
+    const quantityNumber = this.querySelector('[ref="quantityNumber"]');
+
+    if (!(addToCartButton instanceof HTMLButtonElement) || !quantityDisplay || !quantityNumber) return;
 
     const available = !addToCartButton.disabled;
 
-    // Update the quantity number
     quantityNumber.textContent = this.#currentQuantity.toString();
 
-    // Show/hide the quantity display based on availability and quantity
     if (available && this.#currentQuantity > 1) {
       quantityDisplay.style.display = 'inline';
     } else {
       quantityDisplay.style.display = 'none';
     }
+  }
+
+  /**
+   * Sticky ATC sits inside add-to-cart-component so STOQ can target it.
+   * Nested *-component hosts steal `ref` registration from this element.
+   * @returns {HTMLButtonElement | null}
+   */
+  #getStickyButton() {
+    const button = this.querySelector('.sticky-add-to-cart__button');
+    return button instanceof HTMLButtonElement ? button : null;
   }
 }
 

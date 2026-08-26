@@ -125,6 +125,8 @@
     flex-shrink: 0;
     width: var(--quick-add-icon-width);
     height: 100%;
+    /* Keep the icon visually first; the label span must lead in the DOM for STOQ. */
+    order: -1;
   }
 
   .quick-add__product-form-component {

@@ -119,33 +119,39 @@
         {% render 'price', product_resource: product, show_sale_price_first: true %}
       </div>
 
-      <button
-        type="button"
-        class="sticky-add-to-cart__button add-to-cart-button button"
-        ref="addToCartButton"
-        on:click="/handleAddToCartClick"
-        {% unless current_variant.available %}
-          disabled
-        {% endunless %}
-      >
-        <span
-          class="add-to-cart-text"
+      <add-to-cart-component class="sticky-add-to-cart__submit">
+        <button
+          type="button"
+          class="sticky-add-to-cart__button add-to-cart-button button"
+          ref="addToCartButton"
+          on:click="sticky-add-to-cart/handleAddToCartClick"
+          {% unless current_variant.available %}
+            disabled
+          {% endunless %}
         >
+          {% comment %}
+            First child span is the label so STOQ's child `span` selector
+            replaces it (same contract as snippets/add-to-cart-button.liquid).
+            Nested add-to-cart-component matches STOQ's button selector.
+          {% endcomment %}
+          <span class="add-to-cart-text">
+            {%- if current_variant.available -%}
+              {{- 'products.product.add_to_cart' | t -}}
+            {%- elsif current_variant == blank -%}
+              {{- 'products.product.unavailable' | t -}}
+            {%- else -%}
+              {{- 'products.product.sold_out' | t -}}
+            {%- endif -%}
+          </span>
           {% if current_variant.available %}
-            <span class="svg-wrapper">
+            <span
+              aria-hidden="true"
+              class="svg-wrapper add-to-cart-icon"
+            >
               {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
             </span>
           {% endif %}
           <span class="add-to-cart-text__content">
-            <span>
-              {%- if current_variant.available -%}
-                {{- 'products.product.add_to_cart' | t -}}
-              {%- elsif current_variant == blank -%}
-                {{- 'products.product.unavailable' | t -}}
-              {%- else -%}
-                {{- 'products.product.sold_out' | t -}}
-              {%- endif -%}
-            </span>
             <span
               ref="quantityDisplay"
               {% if current_variant.available and initial_quantity > 1 %}
@@ -159,13 +165,13 @@
               {{- ')' -}}
             </span>
           </span>
-        </span>
-        <span class="add-to-cart__added">
-          <span class="svg-wrapper add-to-cart__added-icon">
-            {{- 'icon-checkmark-burst.svg' | inline_asset_content -}}
+          <span class="add-to-cart__added">
+            <span class="svg-wrapper add-to-cart__added-icon">
+              {{- 'icon-checkmark-burst.svg' | inline_asset_content -}}
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </add-to-cart-component>
     </div>
   </sticky-add-to-cart>
 
@@ -289,6 +295,12 @@
     position: relative;
   }
 
+  .sticky-add-to-cart__submit {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+  }
+
   /* Mobile adjustments */
   @media screen and (max-width: 749px) {
     .sticky-add-to-cart__bar {
@@ -302,6 +314,7 @@
       }
     }
 
+    .sticky-add-to-cart__bar .add-to-cart-text,
     .sticky-add-to-cart__bar .add-to-cart-text__content {
       display: none;
     }
@@ -326,11 +339,22 @@
       width: var(--height-buy-buttons);
     }
 
+    sticky-add-to-cart:not([data-variant-available='true']) .add-to-cart-text,
     sticky-add-to-cart:not([data-variant-available='true']) .add-to-cart-text__content {
       display: initial;
     }
 
     sticky-add-to-cart:not([data-variant-available='true']) .sticky-add-to-cart__button {
+      width: auto;
+    }
+
+    .sticky-add-to-cart__button.restock-rocket-updated .add-to-cart-text,
+    .sticky-add-to-cart__button.restock-rocket-preorder-button .add-to-cart-text {
+      display: flex;
+    }
+
+    .sticky-add-to-cart__button.restock-rocket-updated,
+    .sticky-add-to-cart__button.restock-rocket-preorder-button {
       width: auto;
     }
   }

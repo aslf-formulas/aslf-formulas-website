@@ -1,5 +1,9 @@
 # Page templates
 
+## Homepage (`templates/index.json`)
+
+Featured product grid merchandising (catalog handles, Thickening Shampoo next to Hair Growth Boost Serum) is documented in [homepage-product-grid.md](homepage-product-grid.md). STOQ / Restock Rocket add-to-cart label markup is in [stoq-add-to-cart-label.md](stoq-add-to-cart-label.md).
+
 ## About (`templates/page.about.json`)
 
 Two-column About layout using Horizon’s Image with text section pattern (`section` + `group` + `image`), not a CSS overlay on `page.json`.

@@ -197,6 +197,18 @@
     clip-path: circle(100% at 50% 50%);
   }
 
+  /*
+    STOQ / Restock Rocket writes the preorder label into the first child span.
+    Hide the cart icon (and any leftover quantity) so the button doesn't
+    double-print "Add to cart" beside "Sold Out: Preorder".
+  */
+  .add-to-cart-button.restock-rocket-updated > .add-to-cart-icon,
+  .add-to-cart-button.restock-rocket-preorder-button > .add-to-cart-icon,
+  .add-to-cart-button.restock-rocket-updated > .add-to-cart-text__content,
+  .add-to-cart-button.restock-rocket-preorder-button > .add-to-cart-text__content {
+    display: none;
+  }
+
   @keyframes atc-slide {
     to {
       opacity: var(--atc-opacity, 1);
