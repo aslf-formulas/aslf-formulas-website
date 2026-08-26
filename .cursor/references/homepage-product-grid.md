@@ -20,6 +20,10 @@ Current order (shampoo next to Hair Growth Boost Serum):
 
 If `product_list` is empty, `product-list` falls back to the selected collection.
 
+## Gaps
+
+Homepage `product_list_fa6P9H` uses `columns_gap: 0`, `rows_gap: 0`, `gap: 0` so the four cards are flush on desktop (4 columns) and mobile (2 columns). Do not add a CSS `row-gap` override in `sections/product-list.liquid` — that forced `--gap-lg` on mobile even when `rows_gap` was 0. Keep `padding-block-end: 80` under the grid and `product_card_gap: 4` (image-to-title inside a card).
+
 ## Collections/all
 
 Do not hardcode products on `templates/collection.json`. `/collections/all` is Shopify catalog membership. A published product is picked up there without a theme change.

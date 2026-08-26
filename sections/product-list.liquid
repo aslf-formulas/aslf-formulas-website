@@ -105,18 +105,6 @@
   </div>
 </div>
 
-{% stylesheet %}
-  .product-list {
-    --product-list-mobile-row-gap: var(--gap-lg);
-  }
-
-  @media screen and (max-width: 749px) {
-    .product-list .resource-list--grid {
-      row-gap: max(var(--resource-list-row-gap), var(--product-list-mobile-row-gap));
-    }
-  }
-{% endstylesheet %}
-
 {% schema %}
 {
   "name": "t:names.product_list",
