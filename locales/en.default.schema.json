@@ -80,6 +80,7 @@
     "heading": "Heading",
     "heading_size": "Heading size",
     "utilities": "Utilities",
+    "usage": "Usage",
     "home_page": "Home page",
     "icon": "Icon",
     "image": "Image",
@@ -249,7 +250,8 @@
     "video_autoplay": "Videos will be muted by default",
     "video_external": "Use a YouTube or Vimeo URL",
     "pills_usage": "Used for applied filters, discount codes, and search suggestions",
-    "media_type_info": "Features are populated from your menu links"
+    "media_type_info": "Features are populated from your menu links",
+    "serving_text": "Shown on Foundation Capsules only. Leave blank for “Take as directed on the label.” Do not enter a milligram schedule unless it matches the product label."
   },
   "names": {
     "column": "Column",
@@ -1053,6 +1055,7 @@
     "row": "Row",
     "scroll_speed": "Time to next announcement",
     "search": "Search",
+    "serving": "Serving",
     "search_icon": "Search icon",
     // Setting for search bar placement in header
     "search_position": "Position",

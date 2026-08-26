@@ -29,3 +29,7 @@ Because there is no suitable photo in the theme, the image block is an empty `im
 3. Theme editor → About page → select an image in the Image block
 
 Other CMS pages (policies, etc.) keep `templates/page.json` (single column).
+
+## Product PDPs (`templates/product.json`)
+
+Usage copy for the three live SKUs is rewritten in the existing product description block. See [product-pdp-copy.md](product-pdp-copy.md). Do not add new product pages, a Daily Protocol bundle, or subscribe work as part of that copy fix.

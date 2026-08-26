@@ -370,6 +370,15 @@
       "in_cart": "in cart",
       "default_title": "Default Title",
       "sticky_add_to_cart": "Quick add to cart bar"
+    },
+    "usage": {
+      "how_to_use": "How to use",
+      "hair_rule": "Apply to clean, dry scalp. Massage for 1 minute. Leave on overnight. Do not rinse.",
+      "hair_protocol": "A thickening shampoo is coming as Step 1. This serum is the daily leave-on (Step 2).",
+      "moisturizer_rule": "Apply 2 pumps AM and PM on face and neck. In the morning, follow with SPF.",
+      "capsules_stack": "This is the daily cellular stack.",
+      "serving_default": "Take as directed on the label.",
+      "densidyl_supplier": "ALGAKTIV® Densidyl™ supplier data shows a 25.9% increase in hairs in the anagen (growth) phase and an 11.43% increase in overall hair density. These figures are not from an ASLF finished-product trial."
     }
   }
 }

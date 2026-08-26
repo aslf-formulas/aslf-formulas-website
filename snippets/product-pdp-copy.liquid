@@ -1,0 +1,79 @@
+{%- doc -%}
+  Clarifies usage copy on the three ASLF PDPs by rewriting the product description at render time.
+
+  Shopify product admin HTML is left unchanged. This snippet only adjusts how-to-use (and Densidyl attribution) for known handles so the theme can ship copy without inventing SKUs, doses, or clinicals.
+
+  Handles:
+  - hair-growth-boost-serum: one leave-on overnight rule; Densidyl stats labeled as supplier data
+  - foundation-capsules: daily cellular stack + merchant-editable serving (default: take as directed)
+  - age-defense-moisturizer: 2 pumps AM/PM, morning SPF
+
+  @param {object} product - Product (uses handle)
+  @param {string} description - Product description HTML
+  @param {string} [serving_text] - Merchant-editable serving line for Foundation Capsules
+
+  @example
+    {% render 'product-pdp-copy', product: closest.product, description: closest.product.description, serving_text: block.settings.serving_text %}
+{%- enddoc -%}
+
+{%- liquid
+  assign output = description | default: ''
+  assign handle = product.handle
+  assign serving = serving_text | strip
+  if serving == blank
+    assign serving = 'products.usage.serving_default' | t
+  endif
+
+  assign how_to_use_heading = 'products.usage.how_to_use' | t
+  assign hair_rule = 'products.usage.hair_rule' | t
+  assign hair_protocol = 'products.usage.hair_protocol' | t
+  assign moisturizer_rule = 'products.usage.moisturizer_rule' | t
+  assign capsules_stack = 'products.usage.capsules_stack' | t
+  assign densidyl_new = 'products.usage.densidyl_supplier' | t
+
+  # Match strings are live Shopify product-description HTML, not merchant-facing copy.
+  assign hair_old_use = 'Apply a few drops directly to the scalp and massage gently for 1 minute. Leave on overnight or wash out after a few hours. Use daily for best results.'
+  assign densidyl_old = 'Clinical studies show a 25.9% increase in hairs in the anagen (growth) phase and an 11.43% increase in overall hair density.'
+  assign moisturizer_marker_before = '• Made in USA</p>'
+  assign moisturizer_heading_old = 'HOW TO USE:'
+  assign moisturizer_ingredients = 'Full Ingredient List:'
+  assign capsules_usage_class = 'product-pdp-copy__usage'
+-%}
+
+{%- case handle -%}
+  {%- when 'hair-growth-boost-serum' -%}
+    {%- if output contains hair_old_use -%}
+      {%- assign hair_new_use = hair_rule | append: '<br>' | append: hair_protocol -%}
+      {%- assign output = output | replace: hair_old_use, hair_new_use -%}
+    {%- endif -%}
+    {%- if output contains 'How to Use' -%}
+      {%- assign output = output | replace: 'How to Use', how_to_use_heading -%}
+    {%- endif -%}
+    {%- if output contains densidyl_old -%}
+      {%- assign output = output | replace: densidyl_old, densidyl_new -%}
+    {%- endif -%}
+
+  {%- when 'age-defense-moisturizer' -%}
+    {%- if output contains moisturizer_heading_old and output contains moisturizer_ingredients -%}
+      {%- capture moisturizer_usage -%}
+        <p><strong>{{ how_to_use_heading }}</strong></p>
+        <p>{{ moisturizer_rule }}</p>
+      {%- endcapture -%}
+      {%- assign head = output | split: moisturizer_marker_before | first | append: moisturizer_marker_before -%}
+      {%- assign tail = output | split: moisturizer_ingredients | last -%}
+      {%- assign output = head | append: moisturizer_usage | append: '<p>' | append: moisturizer_ingredients | append: tail -%}
+    {%- endif -%}
+
+  {%- when 'foundation-capsules' -%}
+    {%- unless output contains capsules_usage_class -%}
+      {%- capture capsules_usage -%}
+        <div class="product-pdp-copy__usage">
+          <p><strong>{{ how_to_use_heading }}</strong></p>
+          <p>{{ capsules_stack }}</p>
+          <p>{{ serving | escape }}</p>
+        </div>
+      {%- endcapture -%}
+      {%- assign output = capsules_usage | append: output -%}
+    {%- endunless -%}
+{%- endcase -%}
+{{- output -}}

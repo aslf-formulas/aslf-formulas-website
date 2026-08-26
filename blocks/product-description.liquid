@@ -1,12 +1,32 @@
 {% liquid
-  assign product = block.settings.product
+  assign product = closest.product | default: block.settings.product
   if request.visual_preview_mode and product == blank
     assign product = collections.all.products.first
-    assign text = product.description
+  endif
+
+  assign description = block.settings.text
+  if description == blank and product != blank
+    assign description = product.description
   endif
 %}
 
-{% render 'text', fallback_text: text, block: block %}
+{% capture processed_description %}{% render 'product-pdp-copy', product: product, description: description, serving_text: block.settings.serving_text %}{% endcapture %}
+
+{% liquid
+  assign processed_description = processed_description | strip
+  assign original_description = description | strip
+  if processed_description != blank and processed_description != original_description
+    assign text_override = processed_description
+  endif
+%}
+
+{% render 'text', fallback_text: description, text_override: text_override, block: block %}
+
+{% stylesheet %}
+  .product-pdp-copy__usage {
+    margin-block-end: var(--padding-lg);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -17,6 +37,16 @@
       "type": "richtext",
       "id": "text",
       "label": "t:settings.text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.usage"
+    },
+    {
+      "type": "text",
+      "id": "serving_text",
+      "label": "t:settings.serving",
+      "info": "t:info.serving_text"
     },
     {
       "type": "header",
