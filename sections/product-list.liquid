@@ -16,6 +16,7 @@
     {% if section.settings.background_color != blank %}color-custom-{{ section.id }}{% endif %}
     section-resource-list
     product-list
+    {% if section.settings.layout_type == 'grid' and section.settings.rows_gap == 0 %}product-list--flush-rows{% endif %}
     spacing-style
     gap-style
   "
@@ -104,6 +105,23 @@
     {%- content_for 'blocks' -%}
   </div>
 </div>
+
+{% stylesheet %}
+  /*
+    Homepage featured grid keeps rows_gap 0 so desktop stays flush (4-up, no gutters).
+    Mobile still needs space after a price before the next row of images.
+    --gap-lg is 1rem (~16px). Cart/404 keep their own rows_gap and are not flush-rows.
+  */
+  .product-list--flush-rows {
+    --product-list-mobile-row-gap: var(--gap-lg);
+  }
+
+  .product-list--flush-rows .resource-list--grid {
+    @media screen and (max-width: 749px) {
+      row-gap: var(--product-list-mobile-row-gap);
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {

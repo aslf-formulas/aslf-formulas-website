@@ -22,7 +22,11 @@ If `product_list` is empty, `product-list` falls back to the selected collection
 
 ## Gaps
 
-Homepage `product_list_fa6P9H` uses `columns_gap: 0`, `rows_gap: 0`, `gap: 0` so the four cards are flush on desktop (4 columns) and mobile (2 columns). Do not add a CSS `row-gap` override in `sections/product-list.liquid` — that forced `--gap-lg` on mobile even when `rows_gap` was 0. Keep `padding-block-end: 80` under the grid and `product_card_gap: 4` (image-to-title inside a card).
+Homepage `product_list_fa6P9H` uses `columns_gap: 0`, `rows_gap: 0`, `gap: 0` so the four cards stay flush on desktop (4 columns, no gutters). Mobile stays 2 columns with `column-gap: 0`.
+
+Do **not** set `rows_gap` above 0 in `templates/index.json` — that setting applies on desktop too. Instead, `sections/product-list.liquid` adds `.product-list--flush-rows` when `layout_type` is `grid` and `rows_gap` is 0, then sets `row-gap: var(--gap-lg)` (~16px) on `.resource-list--grid` below 750px so prices are not flush against the next row of images.
+
+Keep `padding-block-end: 80` under the grid and `product_card_gap: 4` (image-to-title inside a card). Cart and 404 product lists keep their own `rows_gap` and do not get this mobile override.
 
 ## Collections/all
 
