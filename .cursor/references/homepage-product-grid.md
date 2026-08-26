@@ -30,3 +30,5 @@ Do not hardcode products on `templates/collection.json`. `/collections/all` is S
 - Do not create a shampoo + serum bundle
 - Do not rewrite how-to copy or strip PDP richness on `templates/product.json`
 - Do not add invented packshots to the three-image row (`section_phAEnd`); that row uses `shopify://shop_images/...` files, not product handles
+
+STOQ preorder ATC label markup (first child `span`) is documented in [stoq-add-to-cart-label.md](stoq-add-to-cart-label.md).

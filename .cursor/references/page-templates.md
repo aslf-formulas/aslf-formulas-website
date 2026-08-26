@@ -2,7 +2,7 @@
 
 ## Homepage (`templates/index.json`)
 
-Featured product grid merchandising (catalog handles, Thickening Shampoo next to Hair Growth Boost Serum) is documented in [homepage-product-grid.md](homepage-product-grid.md).
+Featured product grid merchandising (catalog handles, Thickening Shampoo next to Hair Growth Boost Serum) is documented in [homepage-product-grid.md](homepage-product-grid.md). STOQ / Restock Rocket add-to-cart label markup is in [stoq-add-to-cart-label.md](stoq-add-to-cart-label.md).
 
 ## About (`templates/page.about.json`)
 
