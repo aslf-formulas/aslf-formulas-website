@@ -28,6 +28,16 @@ Do **not** set `rows_gap` above 0 in `templates/index.json` — that setting app
 
 Keep `padding-block-end: 80` under the grid and `product_card_gap: 4` (image-to-title inside a card). Cart and 404 product lists keep their own `rows_gap` and do not get this mobile override.
 
+## Reviews section spacing
+
+Judge.me reviews sit in `_blocks` section `1787193859942412c4`, between the featured grid and the three-image banner (`section_phAEnd`).
+
+- Space **above** reviews comes from `product_list_fa6P9H` `padding-block-end: 80` (do not shrink this).
+- Space **below** reviews comes from reviews `padding-block-end: 80` (keep `padding-block-start: 0`).
+- `section_phAEnd` padding start/end stays `0`. Matching the reviews end-padding is enough; do not add banner padding to equalize.
+
+Horizon `_blocks` applies those values via `spacing-style` on the section content wrapper. Prefer JSON padding over a CSS override unless the Judge.me widget’s internal padding still makes the gaps look unequal.
+
 ## Collections/all
 
 Do not hardcode products on `templates/collection.json`. `/collections/all` is Shopify catalog membership. A published product is picked up there without a theme change.
